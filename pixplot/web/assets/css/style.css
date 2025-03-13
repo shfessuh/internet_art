@@ -11,9 +11,8 @@ canvas {
   height: 100%;
 }
 
-body,
-html {
-  background: #111;
+body, html {
+  background: #15e41f !important;
   touch-action: none;
 }
 
@@ -42,7 +41,7 @@ select {
   font-size: 13px;
   padding: 2px 8px;
   border-radius: 5px;
-  background-color: #444;
+  background-color: #15e41f;
   background-image: url(../images/icons/caret-icon.png);
   background-size: 20px;
   background-repeat: no-repeat;
@@ -111,7 +110,7 @@ select:disabled {
   top: 60px;
   left: 100px;
   z-index: 1;
-  background: #000;
+  background: #15e41f;
   max-height: 90%;
 }
 
@@ -273,7 +272,7 @@ select:disabled {
   top: 48px;
   right: 0;
   left: 0;
-  background: #222222;
+  background: #c22626;
   z-index: 2;
   transition: transform 0.3s;
   transform: translateY(-1000px);
@@ -504,7 +503,7 @@ input[type=range]::-ms-thumb {
   font-size: 9px;
   padding: 0 1px;
   border: none;
-  background: #333;
+  background: #7c1818;
   color: #ccc;
   font-weight: 400;
   letter-spacing: 0.04em;
@@ -611,7 +610,7 @@ nav {
   height: auto;
   box-sizing: border-box;
   padding: 50px 0 0;
-  background: #222;
+  background: #740b0b;
   box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.7);
   transition: opacity 0.5s;
   color: #ddd;
@@ -673,7 +672,7 @@ nav h2 {
 
 .hotspot-bar-container {
   height: 5px;
-  background: #444;
+  background: #b01515;
   margin: 6px 0 4px;
 }
 
@@ -921,7 +920,7 @@ nav h2 {
   padding: 40px 40px 0;
   padding-top: 80px;
   transition: transform 1s;
-  background: #000;
+  background: #000000;
   max-height: 100%;
   width: 100%;
   box-sizing: border-box;

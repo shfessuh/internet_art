@@ -403,7 +403,14 @@ Cell.prototype.updateParentBoundingBox = function() {
     bb[d].min = Math.min(bb[d].min, this[d]);
   }.bind(this))
 }
+Cell.prototype.updateRainfall = function() {
+  this.y -= 0.05; // Adjust speed of falling
 
+  // Reset position if it reaches the bottom
+  if (this.y < -10) {  // Adjust based on scene dimensions
+      this.y = 10 + Math.random() * 5; // Reset to a random top position
+  }
+};
 // return the index of this atlas among all atlases
 Cell.prototype.getIndexOfAtlas = function() {
   var i=0; // accumulate cells per atlas until we find this cell's atlas
@@ -882,7 +889,7 @@ function World() {
 
 World.prototype.getScene = function() {
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x111111);
+  scene.background = new THREE.Color(0xff0000);
   return scene;
 }
 
@@ -1110,13 +1117,15 @@ World.prototype.recenterCamera = function(enableDelay) {
 **/
 
 World.prototype.plotPoints = function() {
-  // add the cells for each draw call
   var drawCallToCells = this.getDrawCallToCells();
   this.group = new THREE.Group();
+  var meshes = []; // Store meshes for GSAP animation
+
   for (var drawCallIdx in drawCallToCells) {
     var meshCells = drawCallToCells[drawCallIdx],
         attrs = this.getGroupAttributes(meshCells),
         geometry = new THREE.InstancedBufferGeometry();
+
     geometry.setIndex([0,1,2, 2,3,0]);
     geometry.setAttribute('position', attrs.position);
     geometry.setAttribute('uv', attrs.uv);
@@ -1130,19 +1139,36 @@ World.prototype.plotPoints = function() {
     geometry.setAttribute('selected', attrs.selected);
     geometry.setAttribute('clusterSelected', attrs.clusterSelected);
     geometry.setAttribute('textureIndex', attrs.textureIndex);
-    geometry.setDrawRange(0, meshCells.length); // points not rendered unless draw range is specified
+    geometry.setDrawRange(0, meshCells.length);
+
     var material = this.getShaderMaterial({
       firstTex: attrs.texStartIdx,
       textures: attrs.textures,
       useColor: false,
     });
+
     material.transparent = true;
     var mesh = new THREE.Mesh(geometry, material);
     mesh.frustumCulled = false;
+    mesh.position.y += 50; // Start higher for falling effect
+    meshes.push(mesh); // Store mesh for animation
     this.group.add(mesh);
   }
+
   this.scene.add(this.group);
-}
+
+  // Animate falling effect with GSAP
+  setTimeout(() => {
+    meshes.forEach((mesh, index) => {
+      gsap.to(mesh.position, {
+        y: mesh.position.y - 50, // Move down to correct position
+        duration: 1.5 + Math.random(), // Randomize duration
+        ease: "power2.out",
+        delay: index * 0.05, // Stagger animation
+      });
+    });
+  }, 500);
+};
 
 /**
 * Find the index of each cell's draw call
@@ -1165,8 +1191,12 @@ World.prototype.getDrawCallToCells = function() {
 
 World.prototype.getGroupAttributes = function(cells) {
   var it = this.getCellIterators(cells.length);
+  var dropDelays = new Float32Array(cells.length);
+  var it = this.getCellIterators(cells.length);
+
   for (var i=0; i<cells.length; i++) {
     var cell = cells[i];
+    dropDelays[i] = cell.dropDelay;  // NEW: store dropDelay for each cell
     var rgb = this.color.setHex(cells[i].idx + 1); // use 1-based ids for colors
     it.texIndex[it.texIndexIterator++] = cell.texIdx; // index of texture among all textures -1 means LOD texture
     it.translation[it.translationIterator++] = cell.x; // current position.x
@@ -1221,7 +1251,8 @@ World.prototype.getGroupAttributes = function(cells) {
   selected.usage = THREE.DynamicDrawUsage;
   clusterSelected.usage = THREE.DynamicDrawUsage;
   offset.usage = THREE.DynamicDrawUsage;
-  var texIndices = this.getTexIndices(cells);
+  var dropDelayAttr = new THREE.InstancedBufferAttribute(dropDelays, 1, false, 1);
+  dropDelayAttr.usage = THREE.DynamicDrawUsage;
   return {
     position: position,
     uv: uv,
@@ -1235,6 +1266,7 @@ World.prototype.getGroupAttributes = function(cells) {
     selected: selected,
     clusterSelected: clusterSelected,
     textureIndex: texIndex,
+    dropDelay: dropDelayAttr,
     textures: this.getTextures({
       startIdx: texIndices.first,
       endIdx: texIndices.last,
@@ -1250,26 +1282,25 @@ World.prototype.getGroupAttributes = function(cells) {
 
 World.prototype.getCellIterators = function(n) {
   return {
-    translation: new Float32Array(n * 3),
-    targetTranslation: new Float32Array(n * 3),
-    color: new Float32Array(n * 3),
-    width: new Uint8Array(n),
-    height: new Uint8Array(n),
-    offset: new Uint16Array(n * 2),
-    opacity: new Float32Array(n),
-    selected: new Uint8Array(n),
-    clusterSelected: new Uint8Array(n),
-    texIndex: new Int8Array(n),
-    translationIterator: 0,
-    targetTranslationIterator: 0,
-    colorIterator: 0,
-    widthIterator: 0,
-    heightIterator: 0,
-    offsetIterator: 0,
-    opacityIterator: 0,
-    selectedIterator: 0,
-    clusterSelectedIterator: 0,
-    texIndexIterator: 0,
+    position: position,
+    uv: uv,
+    translation: translation,
+    targetTranslation: targetTranslation,
+    color: color,
+    width: width,
+    height: height,
+    offset: offset,
+    opacity: opacity,
+    selected: selected,
+    clusterSelected: clusterSelected,
+    textureIndex: texIndex,
+    dropDelay: dropDelayAttr,  // NEW!
+    textures: this.getTextures({
+      startIdx: texIndices.first,
+      endIdx: texIndices.last,
+    }),
+    texStartIdx: texIndices.first,
+    texEndIdx: texIndices.last
   }
 }
 
@@ -1376,7 +1407,7 @@ World.prototype.getShaderMaterial = function(obj) {
       },
       lodAtlasPxPerSide: {
         type: 'f',
-        value: config.size.lodTexture,
+        value: config.size.lodTexture * (window.devicePixelRatio || 1),
       },
       cellPxHeight: {
         type: 'f',
@@ -2241,7 +2272,7 @@ ConvexHullGrahamScan.prototype = {
 
 function Picker() {
   this.scene = new THREE.Scene();
-  this.scene.background = new THREE.Color(0x000000);
+  this.scene.background = new THREE.Color(0xff0000);
   this.mouseDown = new THREE.Vector2();
   this.tex = this.getTexture();
 }
@@ -2261,7 +2292,7 @@ Picker.prototype.onMouseDown = function(e) {
   this.mouseDown.y = click.y;
 }
 
-// on canvas click, show detailed modal with clicked image
+// on canvas click, show detailed modal with clicked image\
 Picker.prototype.onMouseUp = function(e) {
   // if click hit background, close the modal
   if (e.target.className == 'modal-top' ||
@@ -2467,7 +2498,7 @@ Text.prototype.getTexture = function() {
   canvas.id = 'character-canvas';
   ctx.font = this.point + 'px Monospace';
   // give the canvas a black background for pixel discarding
-  ctx.fillStyle = '#000000';
+  ctx.fillStyle = '#ff0000';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#ffffff';
   // draw the letters on the canvas
@@ -2778,12 +2809,22 @@ LOD.prototype.toGridCoords = function(pos) {
 // load high-res images nearest the camera; called every frame by world.render
 LOD.prototype.update = function() {
   if (!this.state.run || world.state.flying || world.state.transitioning) return;
+  
+  // Log current camera z position and the threshold
+  console.log("LOD.update - Camera Z:", world.camera.position.z, "minZ:", this.minZ);
+
   this.updateGridPosition();
   this.fetchNextImage();
-  world.camera.position.z < this.minZ
-    ? this.addCellsToLodTexture()
-    : this.clear();
+
+  if (world.camera.position.z < this.minZ) {
+    console.log("LOD.update - Using high-res texture: calling addCellsToLodTexture()");
+    this.addCellsToLodTexture();
+  } else {
+    console.log("LOD.update - Using low-res texture: calling clear()");
+    this.clear();
+  }
 }
+
 
 LOD.prototype.updateGridPosition = function() {
   // determine the current grid position of the user / camera
