@@ -1000,7 +1000,7 @@ nav h2 {
 
 .loader-container {
   max-width: 70px;
-  margin: 100px auto 20px;
+  margin: -200px auto 20px;
   text-align: center;
 }
 
