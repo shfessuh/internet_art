@@ -4,7 +4,6 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600' rel='stylesheet'>
     <link rel='stylesheet' type='text/css' href='assets/css/no-ui-slider.css'>
     <link rel='stylesheet' type='text/css' href='assets/css/style.css'>
-    <link href="https://fonts.googleapis.com/css2?family=Barrio&family=Bowlby+One+SC&family=Climate+Crisis&family=Frijole&family=Kranky&family=Rubik+Glitch&family=Finger+Paint&family=Rubik+Puddles&display=swap" rel="stylesheet">
     <meta name='viewport' content='width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no'>
     <meta http-equiv='ScreenOrientation' content='autoRotate:disabled'>
     <title>PixPlot | Visualizing Image Fields</title>
@@ -430,43 +429,28 @@
     </div>
     <div id='tooltip'></div>
     <!-- Loader -->
-    <!-- Loader -->
-    <div id="loader-scene">
-      <!-- This text stays in the bottom right -->
-      <p class="welcome">
-        This page visualizes a large image collection within an interactive WebGL scene. Each image was processed with an <a href="https://arxiv.org/abs/1409.4842" target="_blank">Inception</a> Convolutional Neural Network, trained on <a href="http://image-net.org/challenges/LSVRC/2012/" target="_blank">ImageNet 2012</a>, and projected into a two-dimensional manifold with the <a href="https://github.com/lmcinnes/umap" target="_blank">UMAP</a> algorithm such that similar images appear proximate to one another.
-      </p>
-    
-      <!-- Loader animation (if still needed) -->
-      <div class="loader-container">
-        <div class="loader-icon">
-          <div class="blocks">
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
-            <div class="block"></div>
+    <div id='loader-scene'>
+      <p class='welcome'>This page visualizes a large image collection within an interactive WebGL scene. Each image was processed with an <a href='https://arxiv.org/abs/1409.4842' target='_blank'>Inception</a> Convolutional Neural Network, trained on <a href='http://image-net.org/challenges/LSVRC/2012/' target='_blank'>ImageNet 2012</a>, and projected into a two-dimensional manifold with the <a href='https://github.com/lmcinnes/umap' target='_blank'>UMAP</a> algorithm such that similar images appear proximate to one another.</p>
+      <div class='loader-container'>
+        <div class='loader-icon'>
+          <div class='blocks'>
+            <div class='block'></div>
+            <div class='block'></div>
+            <div class='block'></div>
+            <div class='block'></div>
+            <div class='block'></div>
+            <div class='block'></div>
+            <div class='block'></div>
+            <div class='block'></div>
+            <div class='block'></div>
           </div>
         </div>
-        <div id="loader-text">
-          <span id="progress">0%</span>
+        <div id='loader-text'>
+          <span id='progress'>0%</span>
         </div>
       </div>
-    
-      <!-- Middle content: new text and enter button -->
-      <div class="middle-content">
-        <p id="middle-text">
-          <span class="title">Falling Memories: A Living Canvas of Eritrea & Ethiopia</span><br>
-          A collection of images capturing the beauty, rhythm, and landscapes of Eritrea and Ethiopia—falling into view like fleeting memories. But memories fade unless they are touched. Explore, engage, and keep them alive.
-        </p>
-        <button id="enter-button">Enter</button>
-      </div>
+      <button id='enter-button'>Enter</button>
     </div>
-    
     <!-- Canvas -->
     <div id='canvas-container'>
       <div id='canvas-target'>
@@ -643,7 +627,7 @@
     <script src='assets/vendor/dist/lodash.min.js'></script>
     <script src='assets/js/object-assign-polyfill.js'></script>
     <script src='assets/vendor/dist/gsap.min.js'></script>
-    <script src='/internet_art/docs/js/trackball-controls.js'></script>
+    <script src='assets/vendor/src/trackball-controls.js'></script>
     <script src='assets/vendor/src/fly-controls.js'></script>
     <script src='assets/vendor/dist/stats.min.js'></script>
     <script src='assets/vendor/dist/gunzip.min.js'></script>
